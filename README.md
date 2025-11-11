@@ -2,19 +2,41 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+import React, { useState, useCallback, useEffect } from 'react';
+import LoginComponent from './components/LoginComponent';
+import MainGenerator from './components/MainGenerator';
+import { AuthData } from './types';
 
-This contains everything you need to run your app locally.
+const App: React.FC = () => {
+    const [auth, setAuth] = useState<AuthData | null>(null);
 
-View your app in AI Studio: https://ai.studio/apps/drive/1PrCorsSTZOaQBNBcL3GWnENkEqOH5DWZ
+    useEffect(() => {
+        const storedAuth = localStorage.getItem('rpm-auth');
+        if (storedAuth) {
+            setAuth(JSON.parse(storedAuth));
+        }
+    }, []);
 
-## Run Locally
+    const handleLogin = useCallback((authData: AuthData) => {
+        setAuth(authData);
+        localStorage.setItem('rpm-auth', JSON.stringify(authData));
+    }, []);
 
-**Prerequisites:**  Node.js
+    const handleLogout = useCallback(() => {
+        setAuth(null);
+        localStorage.removeItem('rpm-auth');
+    }, []);
 
+    return (
+        <div className="min-h-screen bg-gray-900 text-gray-100 font-sans">
+            {auth ? (
+                <MainGenerator auth={auth} onLogout={handleLogout} />
+            ) : (
+                <LoginComponent onLogin={handleLogin} />
+            )}
+        </div>
+    );
+};
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+export default App;
+
